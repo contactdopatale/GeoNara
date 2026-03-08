@@ -1412,7 +1412,7 @@ def fetch_satellites():
                 ma = s.get('MEAN_ANOMALY')
                 bstar = s.get('BSTAR', 0)
                 epoch_str = s.get('EPOCH')
-                norad_id = s.get('NORAD_CAT_ID', 0)
+                norad_id = s.get('id', 0)
                 
                 if mean_motion is None or ecc is None or incl is None:
                     continue
