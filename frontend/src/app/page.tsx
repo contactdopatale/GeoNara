@@ -161,7 +161,7 @@ export default function Dashboard() {
   });
 
   const [activeStyle, setActiveStyle] = useState('DEFAULT');
-  const stylesList = ['DEFAULT', 'SATELLITE', 'FLIR', 'NVG', 'CRT'];
+  const stylesList = ['DEFAULT', 'SATELLITE'];
 
   const cycleStyle = () => {
     setActiveStyle((prev) => {

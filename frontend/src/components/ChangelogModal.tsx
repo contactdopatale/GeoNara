@@ -41,7 +41,7 @@ const NEW_FEATURES = [
     {
         icon: <Layers size={14} className="text-cyan-400" />,
         title: "SATELLITE Style Preset",
-        desc: "STYLE button now cycles: DEFAULT → SATELLITE → FLIR → NVG → CRT. SATELLITE auto-enables high-res imagery.",
+        desc: "STYLE button now cycles: DEFAULT → SATELLITE. SATELLITE auto-enables high-res imagery.",
         color: "cyan",
     },
 ];
