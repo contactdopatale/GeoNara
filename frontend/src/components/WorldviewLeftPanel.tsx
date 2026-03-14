@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plane, AlertTriangle, Activity, Satellite, Cctv, ChevronDown, ChevronUp, Ship, Eye, Anchor, Settings, Sun, Moon, BookOpen, Radio, Play, Pause, Globe, Flame, Wifi, Server, Shield, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plane, AlertTriangle, Activity, Satellite, Cctv, ChevronDown, ChevronUp, Ship, Eye, Anchor, Settings, Sun, Moon, BookOpen, Radio, Play, Pause, Globe, Flame, Wifi, Server, Shield, ToggleLeft, ToggleRight, Palette } from "lucide-react";
 import packageJson from "../../package.json";
 import { useTheme } from "@/lib/ThemeContext";
 
@@ -60,11 +60,11 @@ const POTUS_ICAOS: Record<string, { label: string; type: string }> = {
     'AE5E77': { label: 'Marine One (VH-92A)', type: 'M1' },
     'AE5E79': { label: 'Marine One (VH-92A)', type: 'M1' },
 };
-import type { DashboardData, ActiveLayers, SelectedEntity } from "@/types/dashboard";
+import type { DashboardData, ActiveLayers, SelectedEntity, KiwiSDR } from "@/types/dashboard";
 
-const WorldviewLeftPanel = React.memo(function WorldviewLeftPanel({ data, activeLayers, setActiveLayers, onSettingsClick, onLegendClick, gibsDate, setGibsDate, gibsOpacity, setGibsOpacity, onEntityClick, onFlyTo }: { data: DashboardData; activeLayers: ActiveLayers; setActiveLayers: React.Dispatch<React.SetStateAction<ActiveLayers>>; onSettingsClick?: () => void; onLegendClick?: () => void; gibsDate?: string; setGibsDate?: (d: string) => void; gibsOpacity?: number; setGibsOpacity?: (o: number) => void; onEntityClick?: (entity: SelectedEntity) => void; onFlyTo?: (lat: number, lng: number) => void }) {
+const WorldviewLeftPanel = React.memo(function WorldviewLeftPanel({ data, activeLayers, setActiveLayers, onSettingsClick, onLegendClick, gibsDate, setGibsDate, gibsOpacity, setGibsOpacity, onEntityClick, onFlyTo, trackedSdr, setTrackedSdr }: { data: DashboardData; activeLayers: ActiveLayers; setActiveLayers: React.Dispatch<React.SetStateAction<ActiveLayers>>; onSettingsClick?: () => void; onLegendClick?: () => void; gibsDate?: string; setGibsDate?: (d: string) => void; gibsOpacity?: number; setGibsOpacity?: (o: number) => void; onEntityClick?: (entity: SelectedEntity) => void; onFlyTo?: (lat: number, lng: number) => void; trackedSdr?: KiwiSDR | null; setTrackedSdr?: (sdr: KiwiSDR | null) => void }) {
     const [isMinimized, setIsMinimized] = useState(false);
-    const { theme, toggleTheme } = useTheme();
+    const { theme, toggleTheme, hudColor, cycleHudColor } = useTheme();
     const [gibsPlaying, setGibsPlaying] = useState(false);
     const [potusEnabled, setPotusEnabled] = useState(true);
     const gibsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -172,6 +172,13 @@ const WorldviewLeftPanel = React.memo(function WorldviewLeftPanel({ data, active
                     >
                         {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
                     </button>
+                    <button
+                        onClick={cycleHudColor}
+                        className={`w-7 h-7 rounded-lg border border-[var(--border-primary)] hover:border-cyan-500/50 flex items-center justify-center text-cyan-400 hover:text-cyan-300 transition-all hover:bg-[var(--hover-accent)]`}
+                        title={hudColor === 'cyan' ? 'Switch to Matrix HUD' : 'Switch to Cyan HUD'}
+                    >
+                        <Palette size={14} />
+                    </button>
                     {onSettingsClick && (
                         <button
                             onClick={onSettingsClick}
@@ -238,6 +245,58 @@ const WorldviewLeftPanel = React.memo(function WorldviewLeftPanel({ data, active
                             className="overflow-y-auto styled-scrollbar"
                         >
                             <div className="flex flex-col gap-6 p-4 pt-2 pb-6">
+                                {/* SDR TRACKER — pinned to TOP when active */}
+                                {trackedSdr && (
+                                    <div className="bg-amber-950/20 border border-amber-500/40 rounded-lg p-3 -mt-1 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <Radio size={14} className="text-amber-400" />
+                                                <span className="text-[10px] text-amber-400 font-mono tracking-widest font-bold">SDR TRACKER</span>
+                                                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 animate-pulse">
+                                                    LIVE
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setTrackedSdr?.(null); }}
+                                                className="text-[8px] font-mono text-[var(--text-muted)] hover:text-red-400 border border-[var(--border-primary)] hover:border-red-400/40 rounded px-1.5 py-0.5 transition-colors"
+                                                title="Release SDR and clear tracking"
+                                            >
+                                                RELEASE
+                                            </button>
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex flex-col p-2 rounded-lg border border-amber-500/20 bg-amber-950/10">
+                                                <span className="text-[10px] font-bold font-mono text-amber-300 truncate mb-1">
+                                                    {(trackedSdr.name || 'REMOTE RECEIVER').toUpperCase()}
+                                                </span>
+                                                <div className="text-[8px] text-[var(--text-muted)] font-mono mb-2">
+                                                    {trackedSdr.location && <span>{trackedSdr.location} · </span>}
+                                                    {trackedSdr.antenna && <span>{trackedSdr.antenna.slice(0, 40)}</span>}
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <button
+                                                        onClick={() => onFlyTo?.(trackedSdr.lat, trackedSdr.lon)}
+                                                        className="flex-1 text-center px-2 py-1.5 rounded border border-[var(--border-primary)] hover:border-amber-400/50 hover:text-amber-400 text-[var(--text-muted)] text-[9px] font-mono tracking-widest transition-colors flex items-center justify-center gap-1.5"
+                                                        title="Pan camera to SDR location"
+                                                    >
+                                                        <Globe size={10} /> RE-LOCK
+                                                    </button>
+                                                    {trackedSdr.url && (
+                                                        <a
+                                                            href={trackedSdr.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="flex-1 text-center px-2 py-1.5 rounded border border-amber-500/50 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:border-amber-400 text-[9px] font-mono tracking-widest transition-colors flex items-center justify-center gap-1.5"
+                                                        >
+                                                            <Activity size={10} /> TUNER
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* POTUS Fleet — pinned to TOP when aircraft are active */}
                                 {potusEnabled && potusFlights.length > 0 && (
                                     <div className="bg-[#ff1493]/5 border border-[#ff1493]/30 rounded-lg p-3 -mt-1">

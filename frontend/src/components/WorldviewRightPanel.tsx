@@ -42,7 +42,7 @@ const WorldviewRightPanel = React.memo(function WorldviewRightPanel({ effects, s
             </div>
 
             {/* Right side controls box */}
-            <div className="bg-[var(--bg-primary)]/40 backdrop-blur-md border border-[var(--border-primary)] rounded-xl pointer-events-auto border-r-2 border-r-cyan-900 flex flex-col relative overflow-hidden h-full">
+            <div className="bg-[var(--bg-primary)]/40 backdrop-blur-md border border-[var(--border-primary)] rounded-xl pointer-events-auto border-r-2 border-r-[var(--border-primary)] flex flex-col relative overflow-hidden h-full">
 
                 {/* Header / Toggle */}
                 <div
@@ -71,14 +71,14 @@ const WorldviewRightPanel = React.memo(function WorldviewRightPanel({ effects, s
                                     onClick={() => setEffects({ ...effects, bloom: !effects.bloom })}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <span className={`text-[14px] ${effects.bloom ? 'text-yellow-500' : 'text-gray-600'}`}>✧</span>
+                                        <span className={`text-[14px] ${effects.bloom ? 'text-yellow-500' : 'text-[var(--text-muted)]'}`}>✧</span>
                                         <span className={`text-xs font-mono tracking-widest ${effects.bloom ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>BLOOM</span>
                                     </div>
                                     <span className="text-[9px] font-mono tracking-wider text-[var(--text-muted)]">{effects.bloom ? 'ON' : 'OFF'}</span>
                                 </div>
 
                                 {/* Sharpen Slider */}
-                                <div className="flex flex-col gap-3 group border border-cyan-900/50 bg-cyan-950/10 rounded px-4 py-3 pb-4 relative overflow-hidden">
+                                <div className="flex flex-col gap-3 group border border-[var(--border-primary)]/50 bg-[var(--bg-secondary)]/10 rounded px-4 py-3 pb-4 relative overflow-hidden">
                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500"></div>
                                     <div className="flex items-center gap-2">
                                         <span className="w-3 h-3 rounded-full border border-cyan-400 flex items-center justify-center relative">
@@ -98,7 +98,7 @@ const WorldviewRightPanel = React.memo(function WorldviewRightPanel({ effects, s
                                 {/* HUD Dropdown */}
                                 <div className="flex flex-col gap-2 relative">
                                     <div className="flex items-center gap-3 border border-[var(--border-primary)] rounded px-4 py-3 text-[var(--text-muted)] cursor-default">
-                                        <span className="w-3 h-3 border border-gray-500 rounded-full flex items-center justify-center"></span>
+                                        <span className="w-3 h-3 border border-[var(--border-secondary)] rounded-full flex items-center justify-center"></span>
                                         <span className="text-xs font-mono tracking-widest">HUD</span>
                                     </div>
 

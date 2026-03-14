@@ -456,9 +456,9 @@ function NewsFeedInner({ data, selectedEntity, regionDossier, regionDossierLoadi
                     initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.4 }}
-                    className="w-full bg-black/60 backdrop-blur-md border border-cyan-800 rounded-xl flex flex-col z-10 font-mono shadow-[0_4px_30px_rgba(0,128,255,0.2)] pointer-events-auto overflow-hidden flex-shrink-0"
+                    className="w-full bg-black/60 backdrop-blur-md border border-[var(--border-primary)] rounded-xl flex flex-col z-10 font-mono shadow-[0_4px_30px_rgba(0,0,0,0.5)] pointer-events-auto overflow-hidden flex-shrink-0"
                 >
-                    <div className="p-3 border-b border-cyan-500/30 bg-cyan-950/40 flex justify-between items-center">
+                    <div className="p-3 border-b border-[var(--border-primary)]/30 bg-[var(--bg-secondary)]/40 flex justify-between items-center">
                         <h2 className={`text-xs tracking-widest font-bold ${selectedEntity.type === 'military_flight' ? 'text-red-400' : selectedEntity.type === 'private_flight' ? 'text-orange-400' : selectedEntity.type === 'private_jet' ? 'text-purple-400' : 'text-cyan-400'} flex items-center gap-2`}>
                             {selectedEntity.type === 'military_flight' ? "MILITARY BOGEY INTERCEPT" : selectedEntity.type === 'private_flight' ? "PRIVATE TRANSPONDER" : selectedEntity.type === 'private_jet' ? "PRIVATE JET TRANSPONDER" : "COMMERCIAL TRANSPONDER"}
                         </h2>
@@ -576,9 +576,9 @@ function NewsFeedInner({ data, selectedEntity, regionDossier, regionDossierLoadi
                     initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.4 }}
-                    className="w-full bg-black/60 backdrop-blur-md border border-cyan-800 rounded-xl flex flex-col z-10 font-mono shadow-[0_4px_30px_rgba(0,128,255,0.2)] pointer-events-auto overflow-hidden flex-shrink-0"
+                    className="w-full bg-black/60 backdrop-blur-md border border-[var(--border-primary)] rounded-xl flex flex-col z-10 font-mono shadow-[0_4px_30px_rgba(0,0,0,0.5)] pointer-events-auto overflow-hidden flex-shrink-0"
                 >
-                    <div className="p-3 border-b border-cyan-500/30 bg-cyan-950/40 flex justify-between items-center">
+                    <div className="p-3 border-b border-[var(--border-primary)]/30 bg-[var(--bg-secondary)]/40 flex justify-between items-center">
                         <h2 className={`text-xs tracking-widest font-bold ${headerColor} flex items-center gap-2`}>
                             {headerTitle}
                         </h2>
@@ -648,7 +648,7 @@ function NewsFeedInner({ data, selectedEntity, regionDossier, regionDossierLoadi
     }
 
     if (selectedEntity?.type === 'gdelt') {
-        const gdeltItem = data?.gdelt?.[selectedEntity.id as number];
+        const gdeltItem = data?.gdelt?.find((g: any) => (g.properties?.name || String(g.geometry?.coordinates)) === selectedEntity.id);
         if (gdeltItem && gdeltItem.properties) {
             const props = gdeltItem.properties;
             return (
@@ -810,9 +810,9 @@ function NewsFeedInner({ data, selectedEntity, regionDossier, regionDossierLoadi
                     initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.4 }}
-                    className="w-full bg-black/60 backdrop-blur-md border border-cyan-800 rounded-xl flex flex-col z-10 font-mono shadow-[0_4px_30px_rgba(0,128,255,0.2)] pointer-events-auto overflow-hidden flex-shrink-0"
+                    className="w-full bg-black/60 backdrop-blur-md border border-[var(--border-primary)] rounded-xl flex flex-col z-10 font-mono shadow-[0_4px_30px_rgba(0,0,0,0.5)] pointer-events-auto overflow-hidden flex-shrink-0"
                 >
-                    <div className="p-3 border-b border-cyan-500/30 bg-cyan-950/40 flex justify-between items-center">
+                    <div className="p-3 border-b border-[var(--border-primary)]/30 bg-[var(--bg-secondary)]/40 flex justify-between items-center">
                         <h2 className="text-xs tracking-widest font-bold text-cyan-400 flex items-center gap-2">
                             AERONAUTICAL HUB
                         </h2>
@@ -844,9 +844,9 @@ function NewsFeedInner({ data, selectedEntity, regionDossier, regionDossierLoadi
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.4 }}
-                className="w-full bg-black/60 backdrop-blur-md border border-cyan-800 rounded-xl flex flex-col z-10 font-mono shadow-[0_4px_30px_rgba(0,128,255,0.2)] pointer-events-auto overflow-hidden flex-shrink-0"
+                className="w-full bg-black/60 backdrop-blur-md border border-[var(--border-primary)] rounded-xl flex flex-col z-10 font-mono shadow-[0_4px_30px_rgba(0,0,0,0.5)] pointer-events-auto overflow-hidden flex-shrink-0"
             >
-                <div className="p-3 border-b border-cyan-500/30 bg-cyan-950/40 flex justify-between items-center">
+                <div className="p-3 border-b border-[var(--border-primary)]/30 bg-[var(--bg-secondary)]/40 flex justify-between items-center">
                     <h2 className="text-xs tracking-widest font-bold text-cyan-400 flex items-center gap-2">
                         <AlertTriangle size={14} className="text-red-400" /> {selectedEntity.extra?.last_updated
                             ? new Date(selectedEntity.extra.last_updated + 'Z').toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZoneName: 'short' }).toUpperCase() + ' — OPTIC INTERCEPT'
@@ -936,10 +936,10 @@ function NewsFeedInner({ data, selectedEntity, regionDossier, regionDossierLoadi
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className={`w-full bg-[var(--bg-panel)] backdrop-blur-md border border-[var(--border-primary)] rounded-xl flex flex-col z-10 font-mono shadow-[0_4px_30px_rgba(0,0,0,0.5)] pointer-events-auto overflow-hidden transition-all duration-300 ${isMinimized ? 'h-[50px] flex-shrink-0' : 'flex-1 min-h-0'}`}
+            className={`w-full bg-[var(--bg-primary)]/40 backdrop-blur-md border border-[var(--border-primary)] rounded-xl flex flex-col z-10 font-mono shadow-[0_4px_30px_rgba(0,0,0,0.5)] pointer-events-auto overflow-hidden transition-all duration-300 ${isMinimized ? 'h-[50px] flex-shrink-0' : 'flex-1 min-h-0'}`}
         >
             <div
-                className="p-3 border-b border-cyan-500/20 bg-cyan-950/20 relative overflow-hidden cursor-pointer hover:bg-cyan-900/30 transition-colors"
+                className="p-3 border-b border-[var(--border-primary)]/50 relative overflow-hidden cursor-pointer hover:bg-[var(--bg-secondary)]/50 transition-colors"
                 onClick={() => setIsMinimized(!isMinimized)}
             >
                 <div className="flex justify-between items-center relative z-10">
@@ -1029,7 +1029,7 @@ function NewsFeedInner({ data, selectedEntity, regionDossier, regionDossierLoadi
                                         </span>
                                         <div className="flex items-center gap-2">
                                             {item.cluster_count > 1 && (
-                                                <button onClick={() => toggleExpand(idx)} className="text-[8px] font-bold text-cyan-500 bg-cyan-950/50 hover:text-[var(--text-primary)] hover:bg-cyan-900 border border-cyan-500/30 px-1.5 py-0.5 rounded-sm transition-colors cursor-pointer">
+                                                <button onClick={() => toggleExpand(idx)} className="text-[8px] font-bold text-cyan-500 bg-[var(--bg-secondary)]/50 hover:text-[var(--text-primary)] hover:bg-[var(--hover-accent)] border border-cyan-500/30 px-1.5 py-0.5 rounded-sm transition-colors cursor-pointer">
                                                     {isExpanded ? '[- COLLAPSE]' : `[+${item.cluster_count - 1} SOURCES]`}
                                                 </button>
                                             )}

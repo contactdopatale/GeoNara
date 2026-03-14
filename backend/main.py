@@ -1,8 +1,10 @@
 import os
+import time
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+_start_time = time.time()
 
 # ---------------------------------------------------------------------------
 # Docker Swarm Secrets support
@@ -99,6 +101,10 @@ def _build_cors_origins():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Validate environment variables before starting anything
+    from services.env_check import validate_env
+    validate_env(strict=True)
+
     # Start AIS stream first — it loads the disk cache (instant ships) then
     # begins accumulating live vessel data via WebSocket in the background.
     start_ais_stream()
@@ -178,6 +184,31 @@ async def ais_feed(request: Request):
     count = ingest_ais_catcher(msgs)
     return {"status": "ok", "ingested": count}
 
+from pydantic import BaseModel
+class ViewportUpdate(BaseModel):
+    s: float
+    w: float
+    n: float
+    e: float
+
+@app.post("/api/viewport")
+@limiter.limit("60/minute")
+async def update_viewport(vp: ViewportUpdate, request: Request):
+    """Receive frontend map bounds to dynamically choke the AIS stream."""
+    from services.ais_stream import update_ais_bbox
+    # Add a gentle 10% padding so ships don't pop-in right at the edge
+    pad_lat = (vp.n - vp.s) * 0.1
+    # handle antimeridian bounding box padding later if needed, simple for now:
+    pad_lng = (vp.e - vp.w) * 0.1 if vp.e > vp.w else 0 
+    
+    update_ais_bbox(
+        south=max(-90, vp.s - pad_lat),
+        west=max(-180, vp.w - pad_lng) if pad_lng else vp.w,
+        north=min(90, vp.n + pad_lat),
+        east=min(180, vp.e + pad_lng) if pad_lng else vp.e
+    )
+    return {"status": "ok"}
+
 @app.get("/api/live-data")
 @limiter.limit("120/minute")
 async def live_data(request: Request):
@@ -192,51 +223,92 @@ def _etag_response(request: Request, payload: dict, prefix: str = "", default=No
     return Response(content=content, media_type="application/json",
                     headers={"ETag": etag, "Cache-Control": "no-cache"})
 
+def _bbox_filter(items: list, s: float, w: float, n: float, e: float,
+                 lat_key: str = "lat", lng_key: str = "lng") -> list:
+    """Filter a list of dicts to those within the bounding box (with 20% padding).
+    Handles antimeridian crossing (e.g. w=170, e=-170)."""
+    pad_lat = (n - s) * 0.2
+    pad_lng = (e - w) * 0.2 if e > w else ((e + 360 - w) * 0.2)
+    s2, n2 = s - pad_lat, n + pad_lat
+    w2, e2 = w - pad_lng, e + pad_lng
+    crosses_antimeridian = w2 > e2
+    out = []
+    for item in items:
+        lat = item.get(lat_key)
+        lng = item.get(lng_key)
+        if lat is None or lng is None:
+            out.append(item)  # Keep items without coords (don't filter them out)
+            continue
+        if not (s2 <= lat <= n2):
+            continue
+        if crosses_antimeridian:
+            if lng >= w2 or lng <= e2:
+                out.append(item)
+        else:
+            if w2 <= lng <= e2:
+                out.append(item)
+    return out
+
 @app.get("/api/live-data/fast")
 @limiter.limit("120/minute")
-async def live_data_fast(request: Request):
+async def live_data_fast(request: Request,
+                         s: float = Query(None, description="South bound"),
+                         w: float = Query(None, description="West bound"),
+                         n: float = Query(None, description="North bound"),
+                         e: float = Query(None, description="East bound")):
     d = get_latest_data()
+    has_bbox = all(v is not None for v in (s, w, n, e))
+    def _f(items, lat_key="lat", lng_key="lng"):
+        return _bbox_filter(items, s, w, n, e, lat_key, lng_key) if has_bbox else items
     payload = {
-        "commercial_flights": d.get("commercial_flights", []),
-        "military_flights": d.get("military_flights", []),
-        "private_flights": d.get("private_flights", []),
-        "private_jets": d.get("private_jets", []),
-        "tracked_flights": d.get("tracked_flights", []),
-        "ships": d.get("ships", []),
-        "cctv": d.get("cctv", []),
-        "uavs": d.get("uavs", []),
-        "liveuamap": d.get("liveuamap", []),
-        "gps_jamming": d.get("gps_jamming", []),
-        "satellites": d.get("satellites", []),
+        "commercial_flights": _f(d.get("commercial_flights", [])),
+        "military_flights": _f(d.get("military_flights", [])),
+        "private_flights": _f(d.get("private_flights", [])),
+        "private_jets": _f(d.get("private_jets", [])),
+        "tracked_flights": d.get("tracked_flights", []),  # Always send tracked (small set)
+        "ships": _f(d.get("ships", [])),
+        "cctv": _f(d.get("cctv", []), lat_key="lat", lng_key="lon"),
+        "uavs": _f(d.get("uavs", [])),
+        "liveuamap": _f(d.get("liveuamap", [])),
+        "gps_jamming": _f(d.get("gps_jamming", [])),
+        "satellites": _f(d.get("satellites", [])),
         "satellite_source": d.get("satellite_source", "none"),
         "freshness": dict(source_timestamps),
     }
-    return _etag_response(request, payload, prefix="fast|")
+    bbox_tag = f"{s},{w},{n},{e}" if has_bbox else "full"
+    return _etag_response(request, payload, prefix=f"fast|{bbox_tag}|")
 
 @app.get("/api/live-data/slow")
 @limiter.limit("60/minute")
-async def live_data_slow(request: Request):
+async def live_data_slow(request: Request,
+                         s: float = Query(None, description="South bound"),
+                         w: float = Query(None, description="West bound"),
+                         n: float = Query(None, description="North bound"),
+                         e: float = Query(None, description="East bound")):
     d = get_latest_data()
+    has_bbox = all(v is not None for v in (s, w, n, e))
+    def _f(items, lat_key="lat", lng_key="lng"):
+        return _bbox_filter(items, s, w, n, e, lat_key, lng_key) if has_bbox else items
     payload = {
         "last_updated": d.get("last_updated"),
-        "news": d.get("news", []),
+        "news": d.get("news", []),  # News has coords but we always send it (small set, important)
         "stocks": d.get("stocks", {}),
         "oil": d.get("oil", {}),
         "weather": d.get("weather"),
         "traffic": d.get("traffic", []),
-        "earthquakes": d.get("earthquakes", []),
-        "frontlines": d.get("frontlines"),
-        "gdelt": d.get("gdelt", []),
-        "airports": d.get("airports", []),
-        "satellites": d.get("satellites", []),
-        "kiwisdr": d.get("kiwisdr", []),
+        "earthquakes": _f(d.get("earthquakes", [])),
+        "frontlines": d.get("frontlines"),  # Always send (GeoJSON polygon, not point-filterable)
+        "gdelt": d.get("gdelt", []),  # GeoJSON features — filtered client-side
+        "airports": d.get("airports", []),  # Always send (reference data)
+        "kiwisdr": _f(d.get("kiwisdr", []), lat_key="lat", lng_key="lon"),
         "space_weather": d.get("space_weather"),
-        "internet_outages": d.get("internet_outages", []),
-        "firms_fires": d.get("firms_fires", []),
-        "datacenters": d.get("datacenters", []),
+        "internet_outages": _f(d.get("internet_outages", [])),
+        "firms_fires": _f(d.get("firms_fires", [])),
+        "datacenters": _f(d.get("datacenters", [])),
         "freshness": dict(source_timestamps),
     }
-    return _etag_response(request, payload, prefix="slow|", default=str)
+    bbox_tag = f"{s},{w},{n},{e}" if has_bbox else "full"
+    return _etag_response(request, payload, prefix=f"slow|{bbox_tag}|", default=str)
 
 @app.get("/api/debug-latest")
 @limiter.limit("30/minute")
@@ -270,7 +342,7 @@ async def health_check(request: Request):
         "uptime_seconds": round(time.time() - _start_time),
     }
 
-_start_time = __import__("time").time()
+
 
 from services.radio_intercept import get_top_broadcastify_feeds, get_openmhz_systems, get_recent_openmhz_calls, find_nearest_openmhz_system
 
