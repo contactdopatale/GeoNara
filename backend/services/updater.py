@@ -25,7 +25,7 @@ GITHUB_RELEASES_URL = "https://api.github.com/repos/BigBodyCobain/Shadowbroker/r
 # ---------------------------------------------------------------------------
 # Protected patterns — files/dirs that must NEVER be overwritten during update
 # ---------------------------------------------------------------------------
-_PROTECTED_DIRS = {"venv", "node_modules", ".next", "__pycache__", ".git"}
+_PROTECTED_DIRS = {"venv", "node_modules", ".next", "__pycache__", ".git", ".github", ".claude"}
 _PROTECTED_EXTENSIONS = {".db", ".sqlite"}
 _PROTECTED_NAMES = {
     ".env",
