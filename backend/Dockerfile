@@ -31,8 +31,12 @@ RUN adduser --system --uid 1001 backenduser \
 # Switch to the non-root user
 USER backenduser
 
-# Expose port
-EXPOSE 8000
+# Expose port — Railway injects PORT env var at runtime
+EXPOSE ${PORT:-8000}
 
-# Start FastAPI server
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Health check (works with dynamic PORT)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-8000}/api/live-data/fast || exit 1
+
+# Start FastAPI server — use PORT env var for Railway/Render/Fly.io compatibility
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}

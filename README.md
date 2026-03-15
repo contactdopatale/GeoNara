@@ -69,6 +69,8 @@ Open `http://localhost:3000` to view the dashboard! *(Requires Docker or Podman)
 If both runtimes are installed, you can force Podman with `./compose.sh --engine podman up -d`.
 Do not append a trailing `.` to that command; Compose treats it as a service name.
 
+> **☁️ Deploying to Railway, Render, or Fly.io?** See [DEPLOYMENT.md](DEPLOYMENT.md) for platform-specific instructions. Both Dockerfiles support dynamic `PORT` assignment out of the box.
+
 ---
 
 ##  🔄 **How to Update**
