@@ -4,55 +4,53 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Zap, Ship, Download, Shield, Bug, Heart } from "lucide-react";
 
-const CURRENT_VERSION = "0.9.5";
-const STORAGE_KEY = `shadowbroker_changelog_v${CURRENT_VERSION}`;
+const CURRENT_VERSION = "1.0.0";
+const STORAGE_KEY = `geonara_changelog_v${CURRENT_VERSION}`;
 
 const NEW_FEATURES = [
     {
         icon: <Zap size={14} className="text-cyan-400" />,
-        title: "Parallelized Boot (15s Cold Start)",
-        desc: "Backend startup now runs fast-tier, slow-tier, and airport data concurrently via ThreadPoolExecutor. Boot time cut from 60s+ to ~15s.",
+        title: "Rebranded to Geonara",
+        desc: "Full platform rebrand from ShadowBroker to Geonara — a professional situational awareness platform. New identity, cleaner UI language, analyst-focused positioning.",
         color: "cyan",
     },
     {
         icon: <Shield size={14} className="text-green-400" />,
-        title: "Adaptive Polling + ETag Caching",
-        desc: "Data polling engine rebuilt with adaptive retry (3s startup, 15s steady state) and ETag conditional caching. Map panning no longer interrupts data flow.",
+        title: "Feed Health & Source Confidence",
+        desc: "New /api/feed-status endpoint provides per-source health status (healthy/stale/degraded), confidence scores (0.0–1.0), entity counts, and staleness detection. Visible in left panel.",
         color: "green",
     },
     {
         icon: <Ship size={14} className="text-blue-400" />,
-        title: "Sliding Edge Panels (LAYERS / INTEL)",
-        desc: "Replaced bulky Record Panel with spring-animated side tabs. LAYERS on the left, INTEL (News, Markets, Radio, Find) on the right. Premium tactical HUD feel.",
+        title: "Live System Metrics",
+        desc: "Top bar now shows real-time active source count, total entity count, platform version, and backend connection status with live/offline indicator.",
         color: "blue",
     },
     {
         icon: <Download size={14} className="text-yellow-400" />,
-        title: "Admin Auth + Rate Limiting + Auto-Updater",
-        desc: "Settings and system endpoints protected by X-Admin-Key. All endpoints rate-limited via slowapi. One-click auto-update from GitHub releases with safe backup/restart.",
+        title: "Enhanced Health API",
+        desc: "Health endpoint expanded with per-source confidence tiers, expected update intervals, and staleness detection. Foundation for alerting and feed monitoring.",
         color: "yellow",
     },
     {
         icon: <Shield size={14} className="text-purple-400" />,
-        title: "Docker Swarm Secrets Support",
-        desc: "Production deployments can now load API keys from /run/secrets/ instead of environment variables. env_check.py enforces warning tiers for missing keys.",
+        title: "Improved Globe Reticle",
+        desc: "New logo reticle with equatorial ring, improved spacing, and cleaner subtitle: 'SITUATIONAL AWARENESS PLATFORM'.",
         color: "purple",
     },
 ];
 
 const BUG_FIXES = [
-    "Stable entity IDs for GDELT & News popups — no more wrong popup after data refresh (PR #63)",
-    "useCallback optimization for interpolation functions — eliminates redundant React re-renders on every 1s tick",
-    "Restored missing GDELT and datacenter background refreshes in slow-tier loop",
-    "Server-side viewport bounding box filtering reduces JSON payload size by 80%+",
-    "Modular fetcher architecture sustained over monolithic data_fetcher.py",
-    "CCTV ingestors instantiated once at startup — no more fresh DB connections every 10min tick",
+    "Rebranded all UI strings, localStorage keys, Docker container names, and User-Agent headers to Geonara",
+    "GitHub update checker now points to fitrianabila2025group/GeoNara repository",
+    "Dynamic system metrics replace hard-coded HUD values — shows real source/entity counts",
+    "Backend connection indicator (LIVE/OFFLINE) added to top-right status area",
+    "Feed health confidence scores embedded in backend — foundation for analyst trust indicators",
+    "Improved onboarding modal with updated product description and branding",
 ];
 
 const CONTRIBUTORS = [
-    { name: "@imqdcr", desc: "Ship toggle split into 4 categories + stable MMSI/callsign entity IDs for map markers" },
-    { name: "@csysp", desc: "Dismissible threat alerts + stable entity IDs for GDELT & News popups", pr: "#48, #63" },
-    { name: "@suranyami", desc: "Parallel multi-arch Docker builds (11min \u2192 3min) + runtime BACKEND_URL fix", pr: "#35, #44" },
+    { name: "@fitrianabila2025group", desc: "Full platform rebrand, feed health system, and advanced architecture planning", pr: "#1" },
 ];
 
 export function useChangelog() {
@@ -109,7 +107,7 @@ const ChangelogModal = React.memo(function ChangelogModal({ onClose }: Changelog
                                     </h2>
                                 </div>
                                 <p className="text-[9px] text-[var(--text-muted)] font-mono tracking-widest mt-1">
-                                    SHADOWBROKER INTELLIGENCE PLATFORM UPDATE
+                                    GEONARA INTELLIGENCE PLATFORM UPDATE
                                 </p>
                             </div>
                             <button

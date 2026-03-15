@@ -22,7 +22,7 @@ def _reverse_geocode(lat: float, lng: float) -> dict:
         f"https://nominatim.openstreetmap.org/reverse?"
         f"lat={lat}&lon={lng}&format=json&zoom=10&addressdetails=1&accept-language=en"
     )
-    headers = {"User-Agent": "ShadowBroker-OSINT/1.0 (live-risk-dashboard; contact@shadowbroker.app)"}
+    headers = {"User-Agent": "Geonara/1.0 (situational-awareness-platform; geonara.app)"}
 
     for attempt in range(2):
         # Enforce Nominatim's 1 req/sec policy

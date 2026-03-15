@@ -1,4 +1,4 @@
-# ShadowBroker Frontend
+# Geonara Frontend
 
 Next.js 16 dashboard with MapLibre GL, Cesium, and Framer Motion.
 

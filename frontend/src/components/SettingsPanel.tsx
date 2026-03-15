@@ -54,7 +54,7 @@ const SettingsPanel = React.memo(function SettingsPanel({ isOpen, onClose }: { i
 
     // --- Admin Key (for protected endpoints) ---
     const [adminKey, setAdminKey] = useState(() => {
-        if (typeof window !== 'undefined') return localStorage.getItem('sb_admin_key') || '';
+        if (typeof window !== 'undefined') return localStorage.getItem('geonara_admin_key') || '';
         return '';
     });
     const adminHeaders = (extra?: Record<string, string>): Record<string, string> => {
@@ -245,7 +245,7 @@ const SettingsPanel = React.memo(function SettingsPanel({ isOpen, onClose }: { i
                                 value={adminKey}
                                 onChange={(e) => {
                                     setAdminKey(e.target.value);
-                                    localStorage.setItem('sb_admin_key', e.target.value);
+                                    localStorage.setItem('geonara_admin_key', e.target.value);
                                 }}
                                 placeholder="Enter admin key for protected operations..."
                                 className="flex-1 bg-[var(--bg-primary)]/60 border border-[var(--border-primary)] rounded px-2 py-1 text-[10px] font-mono text-[var(--text-secondary)] outline-none focus:border-cyan-700 placeholder:text-[var(--text-muted)]/50"

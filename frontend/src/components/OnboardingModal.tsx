@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, Key, Shield, Radar, Globe, Satellite, Ship, Radio } from "lucide-react";
 
-const STORAGE_KEY = "shadowbroker_onboarding_complete";
+const STORAGE_KEY = "geonara_onboarding_complete";
 
 const API_GUIDES = [
     {
@@ -100,7 +100,7 @@ const OnboardingModal = React.memo(function OnboardingModal({ onClose, onOpenSet
                                     <Shield size={20} className="text-cyan-400" />
                                 </div>
                                 <div>
-                                    <h2 className="text-sm font-bold tracking-[0.2em] text-[var(--text-primary)] font-mono">MISSION BRIEFING</h2>
+                                    <h2 className="text-sm font-bold tracking-[0.2em] text-[var(--text-primary)] font-mono">WELCOME TO GEONARA</h2>
                                     <span className="text-[9px] text-[var(--text-muted)] font-mono tracking-widest">FIRST-TIME SETUP</span>
                                 </div>
                             </div>
@@ -136,10 +136,10 @@ const OnboardingModal = React.memo(function OnboardingModal({ onClose, onOpenSet
                             <div className="space-y-4">
                                 <div className="text-center py-4">
                                     <div className="text-lg font-bold tracking-[0.3em] text-[var(--text-primary)] font-mono mb-2">
-                                        S H A D O W <span className="text-cyan-400">B R O K E R</span>
+                                        G E O <span className="text-cyan-400">N A R A</span>
                                     </div>
                                     <p className="text-[11px] text-[var(--text-secondary)] font-mono leading-relaxed max-w-md mx-auto">
-                                        Real-time OSINT dashboard aggregating 12+ live intelligence sources.
+                                        Real-time situational awareness platform aggregating 12+ live intelligence sources.
                                         Flights, ships, satellites, earthquakes, conflicts, and more — all on one map.
                                     </p>
                                 </div>

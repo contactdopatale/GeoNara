@@ -1,8 +1,8 @@
 @echo off
-title ShadowBroker - Global Threat Intercept
+title GeoNara - Situational Awareness Platform
 
 echo ===================================================
-echo     S H A D O W B R O K E R   --   STARTUP
+echo     G E O N A R A   --   STARTUP
 echo ===================================================
 echo.
 

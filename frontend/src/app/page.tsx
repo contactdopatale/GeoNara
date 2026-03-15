@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import WorldviewLeftPanel from "@/components/WorldviewLeftPanel";
+import FeedHealthPanel from "@/components/FeedHealthPanel";
 
 import NewsFeed from "@/components/NewsFeed";
 import MarketsPanel from "@/components/MarketsPanel";
@@ -244,31 +245,38 @@ export default function Dashboard() {
             transition={{ duration: 1 }}
             className="absolute top-6 left-6 z-[200] pointer-events-none flex items-center gap-4 hud-zone"
           >
-            <div className="w-8 h-8 flex items-center justify-center">
-              {/* Target Reticle Icon */}
-              <div className="w-6 h-6 rounded-full border border-cyan-500 relative flex items-center justify-center">
-                <div className="w-4 h-4 rounded-full bg-cyan-500/30"></div>
-                <div className="absolute top-[-2px] bottom-[-2px] w-[1px] bg-cyan-500"></div>
-                <div className="absolute left-[-2px] right-[-2px] h-[1px] bg-cyan-500"></div>
+            <div className="w-9 h-9 flex items-center justify-center">
+              {/* Globe Reticle Icon */}
+              <div className="w-7 h-7 rounded-full border-2 border-cyan-500 relative flex items-center justify-center">
+                <div className="w-3.5 h-3.5 rounded-full bg-cyan-500/30"></div>
+                <div className="absolute top-[-3px] bottom-[-3px] w-[1.5px] bg-cyan-500/80"></div>
+                <div className="absolute left-[-3px] right-[-3px] h-[1.5px] bg-cyan-500/80"></div>
+                <div className="absolute w-7 h-3.5 rounded-full border border-cyan-500/40"></div>
               </div>
             </div>
             <div className="flex flex-col">
-              <h1 className="text-2xl font-bold tracking-[0.4em] text-[var(--text-primary)] flex items-center gap-3" style={{ fontFamily: 'monospace' }}>
-                S H A D O W <span className="text-cyan-400">B R O K E R</span>
+              <h1 className="text-2xl font-bold tracking-[0.35em] text-[var(--text-primary)] flex items-center gap-2" style={{ fontFamily: 'monospace' }}>
+                G E O <span className="text-cyan-400">N A R A</span>
               </h1>
-              <span className="text-[9px] text-[var(--text-muted)] font-mono tracking-[0.3em] mt-1 ml-1">GLOBAL THREAT INTERCEPT</span>
+              <span className="text-[9px] text-[var(--text-muted)] font-mono tracking-[0.3em] mt-1 ml-1">SITUATIONAL AWARENESS PLATFORM</span>
             </div>
           </motion.div>
 
           {/* SYSTEM METRICS TOP LEFT */}
           <div className="absolute top-2 left-6 text-[8px] font-mono tracking-widest text-cyan-500/50 z-[200] pointer-events-none hud-zone">
-            OPTIC VIS:113  SRC:180  DENS:1.42  0.8ms
+            {(() => {
+              const activeSources = Object.values(activeLayers).filter(Boolean).length;
+              const totalEntities = (data?.commercial_flights?.length || 0) + (data?.military_flights?.length || 0) + (data?.ships?.length || 0) + (data?.satellites?.length || 0);
+              return `SRC:${activeSources}/${Object.keys(activeLayers).length}  ENT:${totalEntities.toLocaleString()}  VER:1.0.0`;
+            })()}
           </div>
 
-          {/* SYSTEM METRICS TOP RIGHT */}
-          <div className="absolute top-2 right-6 text-[9px] flex flex-col items-end font-mono tracking-widest text-[var(--text-muted)] z-[200] pointer-events-none hud-zone">
-            <div>RTX</div>
-            <div>VSR</div>
+          {/* FEED HEALTH TOP RIGHT */}
+          <div className="absolute top-2 right-6 text-[8px] flex items-center gap-3 font-mono tracking-widest text-[var(--text-muted)] z-[200] pointer-events-none hud-zone">
+            <span className={backendStatus === 'connected' ? 'text-green-500' : 'text-red-500'}>
+              {backendStatus === 'connected' ? '● LIVE' : '● OFFLINE'}
+            </span>
+            <span>GEONARA</span>
           </div>
 
           {/* LEFT HUD CONTAINER — slides off left edge when hidden */}
@@ -280,6 +288,11 @@ export default function Dashboard() {
             {/* LEFT PANEL - DATA LAYERS */}
             <ErrorBoundary name="WorldviewLeftPanel">
               <WorldviewLeftPanel data={data} activeLayers={activeLayers} setActiveLayers={setActiveLayers} onSettingsClick={() => setSettingsOpen(true)} onLegendClick={() => setLegendOpen(true)} gibsDate={gibsDate} setGibsDate={setGibsDate} gibsOpacity={gibsOpacity} setGibsOpacity={setGibsOpacity} onEntityClick={setSelectedEntity} onFlyTo={(lat, lng) => setFlyToLocation({ lat, lng, ts: Date.now() })} trackedSdr={trackedSdr} setTrackedSdr={setTrackedSdr} />
+            </ErrorBoundary>
+
+            {/* FEED HEALTH MONITOR */}
+            <ErrorBoundary name="FeedHealthPanel">
+              <FeedHealthPanel />
             </ErrorBoundary>
           </motion.div>
 

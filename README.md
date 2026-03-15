@@ -1,25 +1,20 @@
 <p align="center">
-  <h1 align="center">🛰️ S H A D O W B R O K E R</h1>
-  <p align="center"><strong>Global Threat Intercept — Real-Time Geospatial Intelligence Platform</strong></p>
-  <p align="center">
-
-  </p>
+  <h1 align="center">🌐 G E O N A R A</h1>
+  <p align="center"><strong>Situational Awareness Platform — Real-Time Multi-Source Geospatial Intelligence</strong></p>
 </p>
 
 ---
 
+**Geonara** is a real-time, multi-domain situational awareness platform that aggregates live data from 23+ open-source intelligence feeds and renders them on a unified map interface. It tracks aircraft, ships, satellites, earthquakes, conflict zones, CCTV networks, GPS jamming, fire hotspots, internet outages, and breaking geopolitical events — all updating in real time.
 
+Built with **Next.js 16**, **MapLibre GL**, **FastAPI**, and **Python**, it's designed for analysts, researchers, and enthusiasts who want a single-pane-of-glass view of global activity.
 
+### What's New in v1.0.0
 
-https://github.com/user-attachments/assets/248208ec-62f7-49d1-831d-4bd0a1fa6852
-
-
-
-
-
-**ShadowBroker** is a real-time, multi-domain OSINT dashboard that aggregates live data from dozens of open-source intelligence feeds and renders them on a unified dark-ops map interface. It tracks aircraft, ships, satellites, earthquakes, conflict zones, CCTV networks, GPS jamming, and breaking geopolitical events — all updating in real time.
-
-Built with **Next.js**, **MapLibre GL**, **FastAPI**, and **Python**, it's designed for analysts, researchers, and enthusiasts who want a single-pane-of-glass view of global activity.
+- **Feed Health Dashboard** — Live per-source health monitoring with confidence scores, staleness detection, and entity counts
+- **Source Confidence Scoring** — 18 intelligence sources rated by reliability tier (Tier 1–3) with transparency into data quality
+- **Dynamic System Metrics** — Real-time source count, entity totals, and backend connection status in the header bar
+- **Professional Rebrand** — Clean, analyst-focused identity with improved UI language throughout
 
 ---
 
@@ -33,7 +28,7 @@ A surprising amount of global telemetry is already public:
 - Earthquake sensors
 - Environmental monitoring networks
 
-This data is scattered across dozens of tools and APIs. ShadowBroker began as an experiment to see what the world looks like when these signals are combined into a single interface.
+This data is scattered across dozens of tools and APIs. Geonara fuses these signals into a single interface for comprehensive situational awareness.
 
 The project does not introduce new surveillance capabilities — it aggregates and visualizes existing public datasets, including public aircraft registration records. It is fully open-source so anyone can audit exactly what data is accessed and how. No user data is collected or transmitted — the dashboard runs entirely in your browser against a self-hosted backend.
 
@@ -55,16 +50,16 @@ The project does not introduce new surveillance capabilities — it aggregates a
 Linux/Mac
 
 ```bash
-git clone https://github.com/BigBodyCobain/Shadowbroker.git
-cd Shadowbroker
+git clone https://github.com/fitrianabila2025group/GeoNara.git
+cd GeoNara
 ./compose.sh up -d
 ```
 
 Windows
 
 ```bash
-git clone https://github.com/BigBodyCobain/Shadowbroker.git
-cd Shadowbroker
+git clone https://github.com/fitrianabila2025group/GeoNara.git
+cd GeoNara
 docker-compose up -d
 ```
 
@@ -224,6 +219,18 @@ Open your project folder, Right-Click, and select "Open Git Bash here".
 * **Measurement Tool** — Point-to-point distance & bearing measurement on the map
 * **LOCATE Bar** — Search by coordinates (31.8, 34.8) or place name (Tehran, Strait of Hormuz) to fly directly to any location — geocoded via OpenStreetMap Nominatim
 
+### 📊 Feed Health & Source Confidence (v1.0.0)
+
+* **Feed Health Dashboard** — Collapsible panel showing real-time health status of all 18 data sources
+  * Per-source entity counts and last-update timestamps
+  * Staleness detection with configurable thresholds per source type
+  * Color-coded indicators: 🟢 Healthy, 🟡 Stale, 🔴 Degraded, ⚫ No Data
+* **Source Confidence Scoring** — Each intelligence source is rated by reliability tier:
+  * **Tier 1 (90–95%)** — Government/institutional feeds (USGS, NASA FIRMS, CelesTrak, NOAA)
+  * **Tier 2 (75–85%)** — Crowd-sourced/commercial feeds (OpenSky, AIS, GDELT, DeepState)
+  * **Tier 3 (55–70%)** — Web-scraped/aggregated feeds (CCTV, KiwiSDR, IODA, news RSS)
+* **Backend Connection Status** — Live ONLINE/OFFLINE indicator with automatic detection
+
 ![Gaza](https://github.com/user-attachments/assets/f2c953b2-3528-4360-af5a-7ea34ff28489)
 
 ---
@@ -304,8 +311,8 @@ Open your project folder, Right-Click, and select "Open Git Bash here".
 The repo includes a `docker-compose.yml` that builds both images locally.
 
 ```bash
-git clone https://github.com/BigBodyCobain/Shadowbroker.git
-cd Shadowbroker
+git clone https://github.com/fitrianabila2025group/GeoNara.git
+cd GeoNara
 # Add your API keys in a repo-root .env file (optional — see Environment Variables below)
 ./compose.sh up -d
 ```
@@ -347,8 +354,8 @@ Create a `docker-compose.yml` with the following content and deploy it directly 
 ```yaml
 services:
   backend:
-    image: ghcr.io/bigbodycobain/shadowbroker-backend:latest
-    container_name: shadowbroker-backend
+    image: ghcr.io/fitrianabila2025group/geonara-backend:latest
+    container_name: geonara-backend
     ports:
       - "8000:8000"
     environment:
@@ -362,8 +369,8 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: ghcr.io/bigbodycobain/shadowbroker-frontend:latest
-    container_name: shadowbroker-frontend
+    image: ghcr.io/fitrianabila2025group/geonara-frontend:latest
+    container_name: geonara-frontend
     ports:
       - "3000:3000"
     environment:
@@ -410,8 +417,8 @@ If you want to modify the code or run from source:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/shadowbroker.git
-cd shadowbroker/live-risk-dashboard
+git clone https://github.com/fitrianabila2025group/GeoNara.git
+cd GeoNara
 
 # Backend setup
 cd backend
@@ -444,7 +451,7 @@ This starts:
 
 ### Local AIS Receiver (Optional)
 
-You can feed your own AIS ship data into ShadowBroker using an RTL-SDR dongle and [AIS-catcher](https://github.com/jvde-github/AIS-catcher), an open-source AIS decoder. This gives you real-time coverage of vessels in your local area — no API key needed.
+You can feed your own AIS ship data into Geonara using an RTL-SDR dongle and [AIS-catcher](https://github.com/jvde-github/AIS-catcher), an open-source AIS decoder. This gives you real-time coverage of vessels in your local area — no API key needed.
 
 1. Plug in an RTL-SDR dongle
 2. Install AIS-catcher ([releases](https://github.com/jvde-github/AIS-catcher/releases)) or use the Docker image:
@@ -457,7 +464,7 @@ You can feed your own AIS ship data into ShadowBroker using an RTL-SDR dongle an
    AIS-catcher -H http://localhost:4000/api/ais/feed interval 10
    ```
 
-AIS-catcher decodes VHF radio signals on 161.975 MHz and 162.025 MHz and POSTs decoded vessel data to ShadowBroker every 10 seconds. Ships detected by your SDR antenna appear alongside the global AIS stream.
+AIS-catcher decodes VHF radio signals on 161.975 MHz and 162.025 MHz and POSTs decoded vessel data to Geonara every 10 seconds. Ships detected by your SDR antenna appear alongside the global AIS stream.
 
 **Docker (ARM/Raspberry Pi):** See [docker-shipfeeder](https://github.com/sdr-enthusiasts/docker-shipfeeder) for a production-ready Docker image optimized for ARM.
 
@@ -546,6 +553,7 @@ live-risk-dashboard/
 │   │       ├── WorldviewLeftPanel.tsx   # Data layer toggles
 │   │       ├── WorldviewRightPanel.tsx  # Search + filter sidebar
 │   │       ├── FilterPanel.tsx     # Basic layer filters
+│   │       ├── FeedHealthPanel.tsx # Feed health monitoring dashboard
 │   │       ├── AdvancedFilterModal.tsx  # Airport/country/owner filtering
 │   │       ├── MapLegend.tsx       # Dynamic legend with all icons
 │   │       ├── MarketsPanel.tsx    # Global financial markets ticker
@@ -598,5 +606,5 @@ This project is for educational and personal research purposes. See individual A
 ---
 
 <p align="center">
-  <sub>Built with ☕ and too many API calls</sub>
+  <sub>Geonara — Built with ☕ and too many API calls</sub>
 </p>

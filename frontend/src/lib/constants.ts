@@ -1,4 +1,4 @@
-// ─── ShadowBroker Frontend Constants ────────────────────────────────────────
+// ─── Geonara Frontend Constants ────────────────────────────────────────
 // Centralized magic numbers. Import from here instead of hardcoding.
 
 // ─── Data Polling ───────────────────────────────────────────────────────────

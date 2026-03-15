@@ -135,7 +135,7 @@ async def lifespan(app: FastAPI):
     stop_scheduler()
     stop_carrier_tracker()
 
-app = FastAPI(title="Live Risk Dashboard API", lifespan=lifespan)
+app = FastAPI(title=\"Geonara Situational Awareness API\", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -340,6 +340,99 @@ async def health_check(request: Request):
         },
         "freshness": dict(source_timestamps),
         "uptime_seconds": round(time.time() - _start_time),
+    }
+
+# ---------------------------------------------------------------------------
+# Feed Health & Source Confidence — per-source status + reliability scores
+# ---------------------------------------------------------------------------
+# Static confidence scores for each data source (0.0–1.0)
+# Based on source type: government APIs > crowdsourced > scraped
+SOURCE_CONFIDENCE = {
+    "commercial_flights": {"score": 0.80, "label": "ADS-B Crowdsourced", "tier": "fast"},
+    "private_flights":    {"score": 0.80, "label": "ADS-B Crowdsourced", "tier": "fast"},
+    "private_jets":       {"score": 0.80, "label": "ADS-B Crowdsourced", "tier": "fast"},
+    "military_flights":   {"score": 0.80, "label": "ADS-B Military Feed", "tier": "fast"},
+    "ships":              {"score": 0.75, "label": "AIS Stream", "tier": "fast"},
+    "satellites":         {"score": 0.90, "label": "CelesTrak TLE + SGP4", "tier": "fast"},
+    "earthquakes":        {"score": 0.95, "label": "USGS Government API", "tier": "slow"},
+    "firms_fires":        {"score": 0.90, "label": "NASA FIRMS Satellite", "tier": "slow"},
+    "news":               {"score": 0.70, "label": "RSS Aggregation", "tier": "slow"},
+    "gdelt":              {"score": 0.60, "label": "GDELT NLP Extraction", "tier": "slow"},
+    "frontlines":         {"score": 0.65, "label": "DeepStateMap OSINT", "tier": "slow"},
+    "liveuamap":          {"score": 0.55, "label": "LiveUAMap Scrape", "tier": "slow"},
+    "cctv":               {"score": 0.85, "label": "Government Transport APIs", "tier": "slow"},
+    "kiwisdr":            {"score": 0.65, "label": "KiwiSDR Hobbyist Net", "tier": "slow"},
+    "internet_outages":   {"score": 0.85, "label": "IODA BGP/Ping Monitor", "tier": "slow"},
+    "datacenters":        {"score": 0.90, "label": "Static Reference DB", "tier": "slow"},
+    "space_weather":      {"score": 0.92, "label": "NOAA SWPC", "tier": "slow"},
+    "weather":            {"score": 0.85, "label": "RainViewer Radar", "tier": "slow"},
+}
+
+@app.get("/api/feed-status")
+@limiter.limit("60/minute")
+async def feed_status(request: Request):
+    """Per-source health status with confidence scores, entity counts, and freshness."""
+    import time
+    d = get_latest_data()
+    now = time.time()
+    feed_health = {}
+
+    # Expected update intervals (seconds) — used to compute staleness
+    expected_intervals = {
+        "commercial_flights": 120, "private_flights": 120, "private_jets": 120,
+        "military_flights": 120, "ships": 120, "satellites": 120,
+        "earthquakes": 600, "firms_fires": 600, "news": 600,
+        "gdelt": 1800, "frontlines": 1800, "liveuamap": 1800,
+        "cctv": 900, "kiwisdr": 600, "internet_outages": 600,
+        "datacenters": 600, "space_weather": 600, "weather": 600,
+    }
+
+    for source_key, meta in SOURCE_CONFIDENCE.items():
+        ts = source_timestamps.get(source_key)
+        entity_count = 0
+        raw = d.get(source_key)
+        if isinstance(raw, list):
+            entity_count = len(raw)
+        elif isinstance(raw, dict):
+            entity_count = 1 if raw else 0
+
+        last_updated = ts if ts else None
+        age_seconds = None
+        status = "unknown"
+
+        if ts:
+            try:
+                from datetime import datetime, timezone
+                dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                age_seconds = round(now - dt.timestamp())
+                max_age = expected_intervals.get(source_key, 600) * 3
+                if age_seconds < expected_intervals.get(source_key, 600) * 1.5:
+                    status = "healthy"
+                elif age_seconds < max_age:
+                    status = "stale"
+                else:
+                    status = "degraded"
+            except Exception:
+                status = "unknown"
+        elif entity_count > 0:
+            status = "healthy"
+        else:
+            status = "no_data"
+
+        feed_health[source_key] = {
+            "status": status,
+            "confidence": meta["score"],
+            "label": meta["label"],
+            "tier": meta["tier"],
+            "entity_count": entity_count,
+            "last_updated": last_updated,
+            "age_seconds": age_seconds,
+        }
+
+    return {
+        "feeds": feed_health,
+        "uptime_seconds": round(now - _start_time),
+        "total_entities": sum(f["entity_count"] for f in feed_health.values()),
     }
 
 

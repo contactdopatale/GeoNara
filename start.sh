@@ -4,7 +4,7 @@
 trap 'kill 0' EXIT SIGINT SIGTERM
 
 echo "======================================================="
-echo "   S H A D O W B R O K E R   -   macOS / Linux Start   "
+echo "     G E O N A R A   -   macOS / Linux Start            "
 echo "======================================================="
 echo ""
 

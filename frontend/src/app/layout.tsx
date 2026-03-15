@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WORLDVIEW // ORBITAL TRACKING",
-  description: "Advanced Geopolitical Risk Dashboard",
+  title: "GEONARA // Situational Awareness Platform",
+  description: "Real-time multi-source geospatial intelligence platform",
 };
 
 export default function RootLayout({
