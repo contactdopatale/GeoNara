@@ -1,0 +1,7 @@
+.git
+*.md
+frontend/node_modules
+backend/venv
+backend/__pycache__
+backend/tests
+frontend/src/__tests__
