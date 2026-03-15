@@ -200,3 +200,28 @@ body {
 .map-focus-active .maplibregl-popup {
   z-index: 10 !important;
 }
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 768px) {
+  /* Larger touch targets for map controls */
+  .maplibregl-ctrl button {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  /* Constrain map popups on small screens */
+  .map-popup {
+    min-width: 160px;
+    max-width: 75vw;
+    font-size: 10px;
+  }
+
+  .map-popup-title {
+    font-size: 11px;
+  }
+
+  /* Prevent horizontal overflow */
+  body {
+    overflow-x: hidden;
+  }
+}

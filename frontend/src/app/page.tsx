@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import dynamic from 'next/dynamic';
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -25,6 +25,7 @@ import { NOMINATIM_DEBOUNCE_MS } from "@/lib/constants";
 import { useDataPolling } from "@/hooks/useDataPolling";
 import { useReverseGeocode } from "@/hooks/useReverseGeocode";
 import { useRegionDossier } from "@/hooks/useRegionDossier";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 // Use dynamic loads for Maplibre to avoid SSR window is not defined errors
 const MaplibreViewer = dynamic(() => import('@/components/MaplibreViewer'), { ssr: false });
@@ -93,7 +94,7 @@ function LocateBar({ onLocate }: { onLocate: (lat: number, lng: number) => void 
   }
 
   return (
-    <div className="relative w-[420px]">
+    <div className="relative w-[min(420px,90vw)]">
       <div className="flex items-center gap-2 bg-[var(--bg-primary)]/80 backdrop-blur-md border border-cyan-800/60 rounded-lg px-3 py-2 shadow-[0_0_20px_rgba(0,255,255,0.1)]">
         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-500 flex-shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         <input
@@ -130,11 +131,38 @@ export default function Dashboard() {
   const [trackedSdr, setTrackedSdr] = useState<any>(null);
   const { regionDossier, regionDossierLoading, handleMapRightClick } = useRegionDossier(selectedEntity, setSelectedEntity);
 
+  const isMobile = useIsMobile();
+
   const [uiVisible, setUiVisible] = useState(true);
-  const [leftOpen, setLeftOpen] = useState(true);
-  const [rightOpen, setRightOpen] = useState(true);
+  const [leftOpen, setLeftOpen] = useState(false);
+  const [rightOpen, setRightOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [legendOpen, setLegendOpen] = useState(false);
+
+  // On desktop, auto-open panels; on mobile, keep closed
+  useEffect(() => {
+    if (!isMobile) {
+      setLeftOpen(true);
+      setRightOpen(true);
+    }
+  }, [isMobile]);
+
+  // On mobile, close the other panel when one opens
+  const toggleLeft = useCallback(() => {
+    setLeftOpen(prev => {
+      const next = !prev;
+      if (next && isMobile) setRightOpen(false);
+      return next;
+    });
+  }, [isMobile]);
+
+  const toggleRight = useCallback(() => {
+    setRightOpen(prev => {
+      const next = !prev;
+      if (next && isMobile) setLeftOpen(false);
+      return next;
+    });
+  }, [isMobile]);
   const [mapView, setMapView] = useState({ zoom: 2, latitude: 20 });
   const [measureMode, setMeasureMode] = useState(false);
   const [measurePoints, setMeasurePoints] = useState<{ lat: number; lng: number }[]>([]);
@@ -243,7 +271,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
-            className="absolute top-6 left-6 z-[200] pointer-events-none flex items-center gap-4 hud-zone"
+            className="absolute top-4 left-4 md:top-6 md:left-6 z-[200] pointer-events-none flex items-center gap-2 md:gap-4 hud-zone"
           >
             <div className="w-9 h-9 flex items-center justify-center">
               {/* Globe Reticle Icon */}
@@ -255,7 +283,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex flex-col">
-              <h1 className="text-2xl font-bold tracking-[0.35em] text-[var(--text-primary)] flex items-center gap-2" style={{ fontFamily: 'monospace' }}>
+              <h1 className="text-lg md:text-2xl font-bold tracking-[0.35em] text-[var(--text-primary)] flex items-center gap-2" style={{ fontFamily: 'monospace' }}>
                 G E O <span className="text-cyan-400">N A R A</span>
               </h1>
               <span className="text-[9px] text-[var(--text-muted)] font-mono tracking-[0.3em] mt-1 ml-1">SITUATIONAL AWARENESS PLATFORM</span>
@@ -263,7 +291,7 @@ export default function Dashboard() {
           </motion.div>
 
           {/* SYSTEM METRICS TOP LEFT */}
-          <div className="absolute top-2 left-6 text-[8px] font-mono tracking-widest text-cyan-500/50 z-[200] pointer-events-none hud-zone">
+          <div className="absolute top-2 left-4 md:left-6 text-[8px] font-mono tracking-widest text-cyan-500/50 z-[200] pointer-events-none hud-zone hidden md:block">
             {(() => {
               const activeSources = Object.values(activeLayers).filter(Boolean).length;
               const totalEntities = (data?.commercial_flights?.length || 0) + (data?.military_flights?.length || 0) + (data?.ships?.length || 0) + (data?.satellites?.length || 0);
@@ -272,7 +300,7 @@ export default function Dashboard() {
           </div>
 
           {/* FEED HEALTH TOP RIGHT */}
-          <div className="absolute top-2 right-6 text-[8px] flex items-center gap-3 font-mono tracking-widest text-[var(--text-muted)] z-[200] pointer-events-none hud-zone">
+          <div className="absolute top-2 right-4 md:right-6 text-[8px] flex items-center gap-3 font-mono tracking-widest text-[var(--text-muted)] z-[200] pointer-events-none hud-zone">
             <span className={backendStatus === 'connected' ? 'text-green-500' : 'text-red-500'}>
               {backendStatus === 'connected' ? '● LIVE' : '● OFFLINE'}
             </span>
@@ -281,8 +309,8 @@ export default function Dashboard() {
 
           {/* LEFT HUD CONTAINER — slides off left edge when hidden */}
           <motion.div
-            className="absolute left-6 top-24 bottom-6 w-80 flex flex-col gap-6 z-[200] pointer-events-none hud-zone"
-            animate={{ x: leftOpen ? 0 : -360 }}
+            className="absolute left-0 md:left-6 top-20 md:top-24 bottom-0 md:bottom-6 w-[85vw] md:w-80 flex flex-col gap-4 md:gap-6 z-[200] pointer-events-none hud-zone"
+            animate={{ x: leftOpen ? 0 : (isMobile ? -window.innerWidth : -360) }}
             transition={{ type: 'spring', damping: 30, stiffness: 250 }}
           >
             {/* LEFT PANEL - DATA LAYERS */}
@@ -299,12 +327,12 @@ export default function Dashboard() {
           {/* LEFT SIDEBAR TOGGLE TAB */}
           <motion.div
             className="absolute left-0 top-1/2 -translate-y-1/2 z-[201] pointer-events-auto hud-zone"
-            animate={{ x: leftOpen ? 344 : 0 }}
+            animate={{ x: leftOpen ? (isMobile ? window.innerWidth * 0.85 : 344) : 0 }}
             transition={{ type: 'spring', damping: 30, stiffness: 250 }}
           >
             <button
-              onClick={() => setLeftOpen(!leftOpen)}
-              className="flex flex-col items-center gap-1.5 py-5 px-1.5 bg-cyan-400 border border-cyan-400 border-l-0 rounded-r-md text-black hover:bg-cyan-300 hover:border-cyan-300 transition-colors shadow-[2px_0_12px_rgba(0,0,0,0.4)]"
+              onClick={toggleLeft}
+              className="flex flex-col items-center gap-1.5 py-5 px-2 md:px-1.5 bg-cyan-400 border border-cyan-400 border-l-0 rounded-r-md text-black hover:bg-cyan-300 hover:border-cyan-300 transition-colors shadow-[2px_0_12px_rgba(0,0,0,0.4)] min-h-[44px]"
             >
               {leftOpen ? <ChevronLeft size={10} /> : <ChevronRight size={10} />}
               <span className="text-[7px] font-mono tracking-[0.2em] font-bold text-black" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>LAYERS</span>
@@ -314,12 +342,12 @@ export default function Dashboard() {
           {/* RIGHT SIDEBAR TOGGLE TAB */}
           <motion.div
             className="absolute right-0 top-1/2 -translate-y-1/2 z-[201] pointer-events-auto hud-zone"
-            animate={{ x: rightOpen ? -344 : 0 }}
+            animate={{ x: rightOpen ? (isMobile ? -window.innerWidth * 0.85 : -344) : 0 }}
             transition={{ type: 'spring', damping: 30, stiffness: 250 }}
           >
             <button
-              onClick={() => setRightOpen(!rightOpen)}
-              className="flex flex-col items-center gap-1.5 py-5 px-1.5 bg-cyan-400 border border-cyan-400 border-r-0 rounded-l-md text-black hover:bg-cyan-300 hover:border-cyan-300 transition-colors shadow-[-2px_0_12px_rgba(0,0,0,0.4)]"
+              onClick={toggleRight}
+              className="flex flex-col items-center gap-1.5 py-5 px-2 md:px-1.5 bg-cyan-400 border border-cyan-400 border-r-0 rounded-l-md text-black hover:bg-cyan-300 hover:border-cyan-300 transition-colors shadow-[-2px_0_12px_rgba(0,0,0,0.4)] min-h-[44px]"
             >
               {rightOpen ? <ChevronRight size={10} /> : <ChevronLeft size={10} />}
               <span className="text-[7px] font-mono tracking-[0.2em] font-bold text-black" style={{ writingMode: 'vertical-rl' }}>INTEL</span>
@@ -328,8 +356,8 @@ export default function Dashboard() {
 
           {/* RIGHT HUD CONTAINER — slides off right edge when hidden */}
           <motion.div
-            className="absolute right-6 top-24 bottom-6 w-80 flex flex-col gap-4 z-[200] pointer-events-auto overflow-y-auto styled-scrollbar pr-2 hud-zone"
-            animate={{ x: rightOpen ? 0 : 360 }}
+            className="absolute right-0 md:right-6 top-20 md:top-24 bottom-0 md:bottom-6 w-[85vw] md:w-80 flex flex-col gap-4 z-[200] pointer-events-auto overflow-y-auto styled-scrollbar pr-2 hud-zone"
+            animate={{ x: rightOpen ? 0 : (isMobile ? window.innerWidth : 360) }}
             transition={{ type: 'spring', damping: 30, stiffness: 250 }}
           >
             <TopRightControls />
@@ -394,55 +422,55 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 1 }}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[200] pointer-events-auto flex flex-col items-center gap-2 hud-zone"
+            className="absolute bottom-3 md:bottom-6 left-1/2 -translate-x-1/2 z-[200] pointer-events-auto flex flex-col items-center gap-2 hud-zone max-w-[95vw]"
           >
             {/* LOCATE BAR — search by coordinates or place name */}
             <LocateBar onLocate={(lat, lng) => setFlyToLocation({ lat, lng, ts: Date.now() })} />
 
             <div
-              className="bg-[var(--bg-primary)]/60 backdrop-blur-md border border-[var(--border-primary)] rounded-xl px-6 py-2.5 flex items-center gap-6 shadow-[0_4px_30px_rgba(0,0,0,0.2)] border-b-2 border-b-cyan-900 cursor-pointer"
+              className="bg-[var(--bg-primary)]/60 backdrop-blur-md border border-[var(--border-primary)] rounded-xl px-3 md:px-6 py-2 md:py-2.5 flex items-center gap-2 md:gap-6 shadow-[0_4px_30px_rgba(0,0,0,0.2)] border-b-2 border-b-cyan-900 cursor-pointer overflow-x-auto max-w-[95vw]"
               onClick={cycleStyle}
             >
               {/* Coordinates */}
-              <div className="flex flex-col items-center min-w-[120px]">
-                <div className="text-[8px] text-[var(--text-muted)] font-mono tracking-[0.2em]">COORDINATES</div>
-                <div className="text-[11px] text-cyan-400 font-mono font-bold tracking-wide">
+              <div className="flex flex-col items-center min-w-[80px] md:min-w-[120px]">
+                <div className="text-[7px] md:text-[8px] text-[var(--text-muted)] font-mono tracking-[0.2em]">COORDINATES</div>
+                <div className="text-[10px] md:text-[11px] text-cyan-400 font-mono font-bold tracking-wide">
                   {mouseCoords ? `${mouseCoords.lat.toFixed(4)}, ${mouseCoords.lng.toFixed(4)}` : '0.0000, 0.0000'}
                 </div>
               </div>
 
               {/* Divider */}
-              <div className="w-px h-8 bg-[var(--border-primary)]" />
+              <div className="w-px h-6 md:h-8 bg-[var(--border-primary)]" />
 
               {/* Location name */}
-              <div className="flex flex-col items-center min-w-[180px] max-w-[320px]">
-                <div className="text-[8px] text-[var(--text-muted)] font-mono tracking-[0.2em]">LOCATION</div>
-                <div className="text-[10px] text-[var(--text-secondary)] font-mono truncate max-w-[320px]">
+              <div className="flex flex-col items-center min-w-[80px] md:min-w-[180px] max-w-[140px] md:max-w-[320px]">
+                <div className="text-[7px] md:text-[8px] text-[var(--text-muted)] font-mono tracking-[0.2em]">LOCATION</div>
+                <div className="text-[9px] md:text-[10px] text-[var(--text-secondary)] font-mono truncate max-w-full">
                   {locationLabel || 'Hover over map...'}
                 </div>
               </div>
 
               {/* Divider */}
-              <div className="w-px h-8 bg-[var(--border-primary)]" />
+              <div className="w-px h-6 md:h-8 bg-[var(--border-primary)]" />
 
               {/* Style preset (compact) */}
               <div className="flex flex-col items-center">
-                <div className="text-[8px] text-[var(--text-muted)] font-mono tracking-[0.2em]">STYLE</div>
-                <div className="text-[11px] text-cyan-400 font-mono font-bold">{activeStyle}</div>
+                <div className="text-[7px] md:text-[8px] text-[var(--text-muted)] font-mono tracking-[0.2em]">STYLE</div>
+                <div className="text-[10px] md:text-[11px] text-cyan-400 font-mono font-bold">{activeStyle}</div>
               </div>
 
-              {/* Divider */}
-              <div className="w-px h-8 bg-[var(--border-primary)]" />
-
-              {/* Space Weather */}
-              <div className="flex flex-col items-center" title={`Kp Index: ${data?.space_weather?.kp_index ?? 'N/A'}`}>
-                <div className="text-[8px] text-[var(--text-muted)] font-mono tracking-[0.2em]">SOLAR</div>
-                <div className={`text-[11px] font-mono font-bold ${
-                  (data?.space_weather?.kp_index ?? 0) >= 5 ? 'text-red-400' :
-                  (data?.space_weather?.kp_index ?? 0) >= 4 ? 'text-yellow-400' :
-                  'text-green-400'
-                }`}>
-                  {data?.space_weather?.kp_text || 'N/A'}
+              {/* Divider + Space Weather — hidden on small mobile */}
+              <div className="hidden sm:flex items-center gap-2 md:gap-6">
+                <div className="w-px h-6 md:h-8 bg-[var(--border-primary)]" />
+                <div className="flex flex-col items-center" title={`Kp Index: ${data?.space_weather?.kp_index ?? 'N/A'}`}>
+                  <div className="text-[7px] md:text-[8px] text-[var(--text-muted)] font-mono tracking-[0.2em]">SOLAR</div>
+                  <div className={`text-[10px] md:text-[11px] font-mono font-bold ${
+                    (data?.space_weather?.kp_index ?? 0) >= 5 ? 'text-red-400' :
+                    (data?.space_weather?.kp_index ?? 0) >= 4 ? 'text-yellow-400' :
+                    'text-green-400'
+                  }`}>
+                    {data?.space_weather?.kp_text || 'N/A'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -461,7 +489,7 @@ export default function Dashboard() {
       )}
 
       {/* DYNAMIC SCALE BAR */}
-      <div className="absolute bottom-[5.5rem] left-[26rem] z-[201] pointer-events-auto">
+      <div className="absolute bottom-[5rem] md:bottom-[5.5rem] left-4 md:left-[26rem] z-[201] pointer-events-auto">
         <ScaleBar
           zoom={mapView.zoom}
           latitude={mapView.latitude}
@@ -511,7 +539,7 @@ export default function Dashboard() {
       {/* BACKEND DISCONNECTED BANNER */}
       {backendStatus === 'disconnected' && (
         <div className="absolute top-0 left-0 right-0 z-[9000] flex items-center justify-center py-2 bg-red-950/90 border-b border-red-500/40 backdrop-blur-sm">
-          <span className="text-[10px] font-mono tracking-widest text-red-400">
+          <span className="text-[9px] md:text-[10px] font-mono tracking-widest text-red-400 px-4 text-center">
             BACKEND OFFLINE — Cannot reach backend server. Check that the backend container is running and BACKEND_URL is correct.
           </span>
         </div>

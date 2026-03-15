@@ -91,7 +91,7 @@ const ChangelogModal = React.memo(function ChangelogModal({ onClose }: Changelog
                 className="fixed inset-0 z-[10001] flex items-center justify-center pointer-events-none"
             >
                 <div
-                    className="w-[560px] max-h-[85vh] bg-[var(--bg-secondary)]/98 border border-cyan-900/50 rounded-xl shadow-[0_0_80px_rgba(0,200,255,0.08)] pointer-events-auto flex flex-col overflow-hidden"
+                    className="w-[90vw] md:w-[560px] max-h-[85vh] bg-[var(--bg-secondary)]/98 border border-cyan-900/50 rounded-xl shadow-[0_0_80px_rgba(0,200,255,0.08)] pointer-events-auto flex flex-col overflow-hidden"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}

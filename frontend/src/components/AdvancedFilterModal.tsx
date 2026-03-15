@@ -162,7 +162,7 @@ export default function AdvancedFilterModal({
                 style={{
                     left: position.x,
                     top: position.y,
-                    width: 480,
+                    width: 'min(480px, 90vw)',
                     userSelect: isDragging ? 'none' : 'auto',
                 }}
             >

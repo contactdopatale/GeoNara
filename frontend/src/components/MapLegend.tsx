@@ -245,7 +245,7 @@ const MapLegend = React.memo(function MapLegend({ isOpen, onClose }: { isOpen: b
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] max-h-[80vh] bg-[var(--bg-secondary)]/95 backdrop-blur-xl border border-cyan-900/50 rounded-xl z-[9999] flex flex-col shadow-[0_0_60px_rgba(0,0,0,0.3)]"
+                        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] md:w-[520px] max-h-[80vh] bg-[var(--bg-secondary)]/95 backdrop-blur-xl border border-cyan-900/50 rounded-xl z-[9999] flex flex-col shadow-[0_0_60px_rgba(0,0,0,0.3)]"
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between p-5 border-b border-[var(--border-primary)]/80 flex-shrink-0">

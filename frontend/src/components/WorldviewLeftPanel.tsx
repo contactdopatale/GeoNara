@@ -167,14 +167,14 @@ const WorldviewLeftPanel = React.memo(function WorldviewLeftPanel({ data, active
                     <h1 className="text-2xl font-bold tracking-[0.2em] text-[var(--text-heading)]">LAYERS</h1>
                     <button
                         onClick={toggleTheme}
-                        className={`w-7 h-7 rounded-lg border border-[var(--border-primary)] hover:border-cyan-500/50 flex items-center justify-center ${theme === 'dark' ? 'text-cyan-400' : 'text-[var(--text-muted)]'} hover:text-cyan-300 transition-all hover:bg-[var(--hover-accent)]`}
+                        className={`w-9 h-9 md:w-7 md:h-7 rounded-lg border border-[var(--border-primary)] hover:border-cyan-500/50 flex items-center justify-center ${theme === 'dark' ? 'text-cyan-400' : 'text-[var(--text-muted)]'} hover:text-cyan-300 transition-all hover:bg-[var(--hover-accent)]`}
                         title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                     >
                         {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
                     </button>
                     <button
                         onClick={cycleHudColor}
-                        className={`w-7 h-7 rounded-lg border border-[var(--border-primary)] hover:border-cyan-500/50 flex items-center justify-center text-cyan-400 hover:text-cyan-300 transition-all hover:bg-[var(--hover-accent)]`}
+                        className={`w-9 h-9 md:w-7 md:h-7 rounded-lg border border-[var(--border-primary)] hover:border-cyan-500/50 flex items-center justify-center text-cyan-400 hover:text-cyan-300 transition-all hover:bg-[var(--hover-accent)]`}
                         title={hudColor === 'cyan' ? 'Switch to Matrix HUD' : 'Switch to Cyan HUD'}
                     >
                         <Palette size={14} />
@@ -182,7 +182,7 @@ const WorldviewLeftPanel = React.memo(function WorldviewLeftPanel({ data, active
                     {onSettingsClick && (
                         <button
                             onClick={onSettingsClick}
-                            className={`w-7 h-7 rounded-lg border border-[var(--border-primary)] hover:border-cyan-500/50 flex items-center justify-center ${theme === 'dark' ? 'text-cyan-400' : 'text-[var(--text-muted)]'} hover:text-cyan-300 transition-all hover:bg-[var(--hover-accent)] group`}
+                            className={`w-9 h-9 md:w-7 md:h-7 rounded-lg border border-[var(--border-primary)] hover:border-cyan-500/50 flex items-center justify-center ${theme === 'dark' ? 'text-cyan-400' : 'text-[var(--text-muted)]'} hover:text-cyan-300 transition-all hover:bg-[var(--hover-accent)] group`}
                             title="System Settings"
                         >
                             <Settings size={14} className="group-hover:rotate-90 transition-transform duration-300" />
@@ -191,7 +191,7 @@ const WorldviewLeftPanel = React.memo(function WorldviewLeftPanel({ data, active
                     {onLegendClick && (
                         <button
                             onClick={onLegendClick}
-                            className={`h-7 px-2 rounded-lg border border-[var(--border-primary)] hover:border-cyan-500/50 flex items-center justify-center gap-1 ${theme === 'dark' ? 'text-cyan-400' : 'text-[var(--text-muted)]'} hover:text-cyan-300 transition-all hover:bg-[var(--hover-accent)]`}
+                            className={`h-9 md:h-7 px-2 rounded-lg border border-[var(--border-primary)] hover:border-cyan-500/50 flex items-center justify-center gap-1 ${theme === 'dark' ? 'text-cyan-400' : 'text-[var(--text-muted)]'} hover:text-cyan-300 transition-all hover:bg-[var(--hover-accent)]`}
                             title="Map Legend / Icon Key"
                         >
                             <BookOpen size={12} />
